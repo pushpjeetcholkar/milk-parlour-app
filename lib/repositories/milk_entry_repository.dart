@@ -1,0 +1,136 @@
+import '../core/database/database_helper.dart';
+import '../models/milk_entry.dart';
+
+class MilkEntryRepository {
+  final DatabaseHelper _db = DatabaseHelper();
+
+  Future<int> insert(MilkEntry entry) async {
+    final db = await _db.database;
+    final map = entry.toMap()..remove('id');
+    return db.insert('milk_entries', map);
+  }
+
+  Future<int> update(MilkEntry entry) async {
+    final db = await _db.database;
+    return db.update(
+      'milk_entries',
+      entry.toMap(),
+      where: 'id = ?',
+      whereArgs: [entry.id],
+    );
+  }
+
+  Future<int> delete(int id) async {
+    final db = await _db.database;
+    return db.delete('milk_entries', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<List<MilkEntry>> getAll({int? limit}) async {
+    final db = await _db.database;
+    final maps = await db.rawQuery('''
+      SELECT me.*, c.name AS customer_name
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      ORDER BY me.date DESC
+      ${limit != null ? 'LIMIT $limit' : ''}
+    ''');
+    return maps.map(MilkEntry.fromMap).toList();
+  }
+
+  Future<List<MilkEntry>> getByCustomer(int customerId) async {
+    final db = await _db.database;
+    final maps = await db.rawQuery('''
+      SELECT me.*, c.name AS customer_name
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE me.customer_id = ?
+      ORDER BY me.date DESC
+    ''', [customerId]);
+    return maps.map(MilkEntry.fromMap).toList();
+  }
+
+  Future<List<MilkEntry>> getByDate(DateTime date) async {
+    final db = await _db.database;
+    final dateStr = date.toIso8601String().substring(0, 10);
+    final maps = await db.rawQuery('''
+      SELECT me.*, c.name AS customer_name
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE DATE(me.date) = ?
+      ORDER BY me.date DESC
+    ''', [dateStr]);
+    return maps.map(MilkEntry.fromMap).toList();
+  }
+
+  Future<List<MilkEntry>> getByDateRange(
+      DateTime from, DateTime to) async {
+    final db = await _db.database;
+    final fromStr = from.toIso8601String().substring(0, 10);
+    final toStr = to.toIso8601String().substring(0, 10);
+    final maps = await db.rawQuery('''
+      SELECT me.*, c.name AS customer_name
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE DATE(me.date) BETWEEN ? AND ?
+      ORDER BY me.date DESC
+    ''', [fromStr, toStr]);
+    return maps.map(MilkEntry.fromMap).toList();
+  }
+
+  Future<List<MilkEntry>> getByCustomerAndDateRange(
+      int customerId, DateTime from, DateTime to) async {
+    final db = await _db.database;
+    final fromStr = from.toIso8601String().substring(0, 10);
+    final toStr = to.toIso8601String().substring(0, 10);
+    final maps = await db.rawQuery('''
+      SELECT me.*, c.name AS customer_name
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE me.customer_id = ? AND DATE(me.date) BETWEEN ? AND ?
+      ORDER BY me.date ASC
+    ''', [customerId, fromStr, toStr]);
+    return maps.map(MilkEntry.fromMap).toList();
+  }
+
+  // Dashboard: today's totals
+  Future<Map<String, double>> getTodayTotals() async {
+    final db = await _db.database;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    final result = await db.rawQuery('''
+      SELECT
+        COALESCE(SUM(quantity), 0) AS total_quantity,
+        COALESCE(SUM(amount), 0) AS total_amount
+      FROM milk_entries
+      WHERE DATE(date) = ?
+    ''', [today]);
+    final row = result.first;
+    return {
+      'total_quantity': (row['total_quantity'] as num).toDouble(),
+      'total_amount': (row['total_amount'] as num).toDouble(),
+    };
+  }
+
+  // Monthly report summary per customer
+  Future<List<Map<String, dynamic>>> getMonthlySummary(
+      int year, int month) async {
+    final db = await _db.database;
+    final from =
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-01';
+    final lastDay = DateTime(year, month + 1, 0).day;
+    final to =
+        '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${lastDay.toString().padLeft(2, '0')}';
+
+    return db.rawQuery('''
+      SELECT
+        c.name AS customer_name,
+        SUM(me.quantity) AS total_quantity,
+        AVG(me.fat) AS avg_fat,
+        SUM(me.amount) AS total_amount
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE DATE(me.date) BETWEEN ? AND ?
+      GROUP BY me.customer_id
+      ORDER BY c.name ASC
+    ''', [from, to]);
+  }
+}
