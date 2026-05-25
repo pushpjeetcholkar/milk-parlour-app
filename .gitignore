@@ -24,5 +24,8 @@ build/
 # macOS
 .DS_Store
 
+# VS internal files
+.vs/
+
 # Misc
 pubspec.lock
