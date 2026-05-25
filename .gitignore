@@ -29,3 +29,5 @@ build/
 
 # Misc
 pubspec.lock
+*.apk
+*.aab
