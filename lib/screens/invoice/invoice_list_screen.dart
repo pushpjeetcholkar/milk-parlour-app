@@ -206,7 +206,7 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        '₹ ${_currFmt.format(inv.totalAmount)}',
+                        'INR ${_currFmt.format(inv.totalAmount)}',
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,

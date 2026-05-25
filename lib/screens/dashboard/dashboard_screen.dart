@@ -67,7 +67,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Expanded(
                       child: _SummaryCard(
                         label: "Today's Amount",
-                        value: '₹ ${_currencyFmt.format(milkProv.todayAmount)}',
+                        value: 'INR ${_currencyFmt.format(milkProv.todayAmount)}',
                         icon: Icons.currency_rupee,
                         color: Colors.green,
                       ),
@@ -167,7 +167,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   style: const TextStyle(
                                       fontWeight: FontWeight.bold)),
                               Text(
-                                '₹ ${_currencyFmt.format(e.amount)}',
+                                'INR ${_currencyFmt.format(e.amount)}',
                                 style: const TextStyle(
                                     color: Colors.green, fontSize: 12),
                               ),

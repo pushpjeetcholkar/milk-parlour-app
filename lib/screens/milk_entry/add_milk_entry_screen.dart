@@ -237,7 +237,7 @@ class _AddMilkEntryScreenState extends State<AddMilkEntryScreen> {
                               value: _kgFat.toStringAsFixed(4)),
                           _CalcValue(
                               label: 'Amount',
-                              value: '₹ ${_amount.toStringAsFixed(2)}'),
+                              value: 'INR ${_amount.toStringAsFixed(2)}'),
                         ],
                       ),
                     ],

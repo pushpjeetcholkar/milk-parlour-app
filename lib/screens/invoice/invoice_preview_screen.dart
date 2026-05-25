@@ -169,13 +169,13 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                 e.fat.toStringAsFixed(2),
                 e.rate.toStringAsFixed(2),
                 e.kgFat.toStringAsFixed(4),
-                '₹${_currFmt.format(e.amount)}',
+                'INR${_currFmt.format(e.amount)}',
               ])),
           const Divider(thickness: 2),
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'Total Payable: ₹ ${_currFmt.format(widget.invoice.totalAmount)}',
+              'Total Payable: INR ${_currFmt.format(widget.invoice.totalAmount)}',
               style: const TextStyle(
                   fontSize: 18, fontWeight: FontWeight.bold),
             ),

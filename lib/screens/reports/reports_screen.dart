@@ -162,7 +162,7 @@ class _DailyReport extends StatelessWidget {
                           child: _StatCard(
                             label: 'Total Amount',
                             value:
-                                '₹ ${currFmt.format(totalAmount)}',
+                                'INR ${currFmt.format(totalAmount)}',
                             color: Colors.green,
                           ),
                         ),
@@ -198,7 +198,7 @@ class _DailyReport extends StatelessWidget {
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold)),
                                 Text(
-                                    '₹ ${currFmt.format(e.amount)}',
+                                    'INR ${currFmt.format(e.amount)}',
                                     style: const TextStyle(
                                         color: Colors.green,
                                         fontSize: 12)),
@@ -324,7 +324,7 @@ class _MonthlyReport extends StatelessWidget {
                           child: _StatCard(
                             label: 'Total Amount',
                             value:
-                                '₹ ${currFmt.format(totalAmount)}',
+                                'INR ${currFmt.format(totalAmount)}',
                             color: Colors.green,
                           ),
                         ),
@@ -359,7 +359,7 @@ class _MonthlyReport extends StatelessWidget {
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold)),
                                 Text(
-                                    '₹ ${currFmt.format(r['total_amount'])}',
+                                    'INR ${currFmt.format(r['total_amount'])}',
                                     style: const TextStyle(
                                         color: Colors.green,
                                         fontSize: 12)),

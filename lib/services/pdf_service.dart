@@ -14,7 +14,7 @@ class PdfService {
   static final _currencyFormat = NumberFormat('#,##0.00');
 
   // ── Font loader ────────────────────────────────────────────────────────────
-  // Noto Sans supports ₹ (Rupee sign U+20B9) unlike the built-in PDF fonts.
+  // Noto Sans supports INR (Rupee sign U+20B9) unlike the built-in PDF fonts.
   // PdfGoogleFonts downloads once and caches on-device for offline use.
   static Future<pw.ThemeData> _buildTheme() async {
     final regular = await PdfGoogleFonts.notoSansRegular();
@@ -116,7 +116,7 @@ class PdfService {
   // ── Entries Table ──────────────────────────────────────────────────────────
   static pw.Widget _buildEntriesTable(List<MilkEntry> entries) {
     const headers = [
-      'Date', 'Qty (L)', 'CLR', 'FAT %', 'Rate', 'KG FAT', 'Amount (₹)'
+      'Date', 'Qty (L)', 'CLR', 'FAT %', 'Rate', 'KG FAT', 'Amount (INR)'
     ];
     final columnWidths = {
       0: const pw.FlexColumnWidth(2.2),
@@ -157,7 +157,7 @@ class PdfService {
               _cell(e.fat.toStringAsFixed(2)),
               _cell(e.rate.toStringAsFixed(2)),
               _cell(e.kgFat.toStringAsFixed(4)),
-              _cell('₹ ${_currencyFormat.format(e.amount)}'),
+              _cell('INR ${_currencyFormat.format(e.amount)}'),
             ],
           ),
         ),
@@ -196,7 +196,7 @@ class PdfService {
             pw.Divider(color: PdfColors.blue200),
             pw.SizedBox(height: 6),
             pw.Text(
-              'Total Payable: ₹ ${_currencyFormat.format(invoice.totalAmount)}',
+              'Total Payable: INR ${_currencyFormat.format(invoice.totalAmount)}',
               style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 15,
