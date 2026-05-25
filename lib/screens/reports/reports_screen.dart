@@ -363,6 +363,9 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
   }
 
   Future<void> _pickDate({required bool isFrom}) async {
+    // Daily mode: From is locked — only the single "Date" picker is active
+    if (isFrom && _period == _PeriodType.daily) return;
+
     final picked = await showDatePicker(
       context: context,
       initialDate: isFrom ? _from : _to,
@@ -376,7 +379,12 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
         if (_to.isBefore(_from)) _to = _from;
       } else {
         _to = picked;
-        if (_from.isAfter(_to)) _from = _to;
+        // In daily mode keep From in sync with To (single day query)
+        if (_period == _PeriodType.daily) {
+          _from = picked;
+        } else if (_from.isAfter(_to)) {
+          _from = _to;
+        }
       }
       _results = null;
     });
@@ -389,16 +397,17 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
       _results = null;
       switch (p) {
         case _PeriodType.daily:
-          _from = now.subtract(const Duration(days: 6));
-          _to = now;
+          // Single date — From is locked to same as To
+          _to   = now;
+          _from = now;
           break;
         case _PeriodType.weekly:
           _from = now.subtract(const Duration(days: 27));
-          _to = now;
+          _to   = now;
           break;
         case _PeriodType.monthly:
           _from = DateTime(now.year, 1, 1);
-          _to = now;
+          _to   = now;
           break;
         case _PeriodType.custom:
           break;
@@ -484,13 +493,16 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
                       label: 'From',
                       date: _from,
                       dateFmt: _dateFmt,
+                      // Grayed out when Daily — single date mode
+                      disabled: _period == _PeriodType.daily,
                       onTap: () => _pickDate(isFrom: true),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _DateCard(
-                      label: 'To',
+                      // Relabel as "Date" when Daily
+                      label: _period == _PeriodType.daily ? 'Date' : 'To',
                       date: _to,
                       dateFmt: _dateFmt,
                       onTap: () => _pickDate(isFrom: false),
@@ -667,40 +679,58 @@ class _DateCard extends StatelessWidget {
   final DateTime date;
   final DateFormat dateFmt;
   final VoidCallback onTap;
+  final bool disabled;
 
   const _DateCard({
     required this.label,
     required this.date,
     required this.dateFmt,
     required this.onTap,
+    this.disabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: disabled ? null : onTap,
       child: Container(
         padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade400),
+          // Gray background when disabled
+          color: disabled ? Colors.grey.shade200 : Colors.white,
+          border: Border.all(
+            color: disabled
+                ? Colors.grey.shade300
+                : Colors.grey.shade400,
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
           children: [
-            const Icon(Icons.calendar_today,
-                size: 16, color: Colors.blue),
+            Icon(Icons.calendar_today,
+                size: 16,
+                color: disabled ? Colors.grey.shade400 : Colors.blue),
             const SizedBox(width: 6),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label,
-                    style: const TextStyle(
-                        fontSize: 11, color: Colors.grey)),
-                Text(dateFmt.format(date),
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13)),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: disabled
+                            ? Colors.grey.shade400
+                            : Colors.grey)),
+                Text(
+                  dateFmt.format(date),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: disabled
+                        ? Colors.grey.shade400
+                        : Colors.black87,
+                  ),
+                ),
               ],
             ),
           ],
