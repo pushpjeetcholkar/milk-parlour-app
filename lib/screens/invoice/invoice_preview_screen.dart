@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import '../../models/invoice.dart';
@@ -59,6 +60,19 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
     }
   }
 
+  Future<void> _openPdf() async {
+    if (_pdfPath == null) return;
+    final result = await OpenFile.open(_pdfPath!);
+    if (result.type != ResultType.done && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Cannot open PDF: ${result.message}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +80,11 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
         title: Text('Invoice ${widget.invoice.invoiceNumber}'),
         actions: [
           if (_pdfPath != null) ...[
+            IconButton(
+              icon: const Icon(Icons.open_in_new),
+              tooltip: 'Open PDF',
+              onPressed: _openPdf,
+            ),
             IconButton(
               icon: const Icon(Icons.share),
               tooltip: 'Share / WhatsApp',
@@ -106,17 +125,25 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
+                        onPressed: _openPdf,
+                        icon: const Icon(Icons.open_in_new),
+                        label: const Text('Open PDF'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
                         onPressed: () => PdfService.printPdf(_pdfPath!),
                         icon: const Icon(Icons.print),
                         label: const Text('Print'),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () => PdfService.sharePdf(_pdfPath!),
                         icon: const Icon(Icons.share),
-                        label: const Text('Share / WhatsApp'),
+                        label: const Text('Share'),
                       ),
                     ),
                   ],
@@ -128,6 +155,10 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
   }
 
   Widget _buildFallbackView() {
+    final entries = widget.entries;
+    final totalKgFat =
+        entries.fold<double>(0, (s, e) => s + e.kgFat);
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -159,11 +190,12 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               'Period: ${_dateFmt.format(widget.invoice.fromDate)} - ${_dateFmt.format(widget.invoice.toDate)}'),
           const SizedBox(height: 12),
           _tableRow(
-              ['Date', 'Qty', 'CLR', 'FAT', 'Rate', 'KGFAT', 'Amount'],
+              ['Date', 'Shift', 'Qty', 'CLR', 'FAT', 'Rate', 'KGFAT', 'Amount'],
               isHeader: true),
           const Divider(),
-          ...widget.entries.map((e) => _tableRow([
+          ...entries.map((e) => _tableRow([
                 _dateFmt.format(e.date),
+                e.shift,
                 e.quantity.toStringAsFixed(2),
                 e.clr.toStringAsFixed(2),
                 e.fat.toStringAsFixed(2),
@@ -174,10 +206,18 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
           const Divider(thickness: 2),
           Align(
             alignment: Alignment.centerRight,
-            child: Text(
-              'Total Payable: INR ${_currFmt.format(widget.invoice.totalAmount)}',
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text('Total KG FAT: ${totalKgFat.toStringAsFixed(4)}',
+                    style: const TextStyle(fontSize: 14)),
+                const SizedBox(height: 4),
+                Text(
+                  'Total Payable: INR ${_currFmt.format(widget.invoice.totalAmount)}',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         ],
@@ -194,7 +234,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
                   child: Text(
                     c,
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight:
                           isHeader ? FontWeight.bold : FontWeight.normal,
                     ),

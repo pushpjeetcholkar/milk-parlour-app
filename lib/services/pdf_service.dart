@@ -116,16 +116,17 @@ class PdfService {
   // ── Entries Table ──────────────────────────────────────────────────────────
   static pw.Widget _buildEntriesTable(List<MilkEntry> entries) {
     const headers = [
-      'Date', 'Qty (L)', 'CLR', 'FAT %', 'Rate', 'KG FAT', 'Amount (INR)'
+      'Date', 'Shift', 'Qty (L)', 'CLR', 'FAT %', 'Rate', 'KG FAT', 'Amount (INR)'
     ];
     final columnWidths = {
-      0: const pw.FlexColumnWidth(2.2),
-      1: const pw.FlexColumnWidth(1.5),
-      2: const pw.FlexColumnWidth(1.2),
-      3: const pw.FlexColumnWidth(1.2),
-      4: const pw.FlexColumnWidth(1.5),
-      5: const pw.FlexColumnWidth(1.5),
-      6: const pw.FlexColumnWidth(2.2),
+      0: const pw.FlexColumnWidth(2.0),
+      1: const pw.FlexColumnWidth(1.3),
+      2: const pw.FlexColumnWidth(1.3),
+      3: const pw.FlexColumnWidth(1.0),
+      4: const pw.FlexColumnWidth(1.0),
+      5: const pw.FlexColumnWidth(1.2),
+      6: const pw.FlexColumnWidth(1.4),
+      7: const pw.FlexColumnWidth(2.0),
     };
 
     return pw.Table(
@@ -141,7 +142,7 @@ class PdfService {
                     child: pw.Text(
                       h,
                       style: pw.TextStyle(
-                          fontWeight: pw.FontWeight.bold, fontSize: 9),
+                          fontWeight: pw.FontWeight.bold, fontSize: 8),
                       textAlign: pw.TextAlign.center,
                     ),
                   ))
@@ -152,6 +153,7 @@ class PdfService {
           (e) => pw.TableRow(
             children: [
               _cell(_dateFormat.format(e.date)),
+              _cell(e.shift),
               _cell(e.quantity.toStringAsFixed(2)),
               _cell(e.clr.toStringAsFixed(2)),
               _cell(e.fat.toStringAsFixed(2)),
@@ -190,6 +192,11 @@ class PdfService {
           children: [
             pw.Text(
               'Total Quantity: ${invoice.totalQuantity.toStringAsFixed(2)} L',
+              style: pw.TextStyle(fontSize: 11),
+            ),
+            pw.SizedBox(height: 4),
+            pw.Text(
+              'Total KG FAT: ${invoice.totalKgFat.toStringAsFixed(4)}',
               style: pw.TextStyle(fontSize: 11),
             ),
             pw.SizedBox(height: 6),

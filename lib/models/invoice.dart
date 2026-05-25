@@ -6,6 +6,7 @@ class Invoice {
   final DateTime fromDate;
   final DateTime toDate;
   final double totalQuantity;
+  final double totalKgFat;
   final double totalAmount;
   final String? pdfPath;
   final DateTime createdAt;
@@ -18,6 +19,7 @@ class Invoice {
     required this.fromDate,
     required this.toDate,
     required this.totalQuantity,
+    this.totalKgFat = 0,
     required this.totalAmount,
     this.pdfPath,
     required this.createdAt,
@@ -31,6 +33,7 @@ class Invoice {
         fromDate: fromDate,
         toDate: toDate,
         totalQuantity: totalQuantity,
+        totalKgFat: totalKgFat,
         totalAmount: totalAmount,
         pdfPath: pdfPath ?? this.pdfPath,
         createdAt: createdAt,
@@ -43,6 +46,7 @@ class Invoice {
         'from_date': fromDate.toIso8601String(),
         'to_date': toDate.toIso8601String(),
         'total_quantity': totalQuantity,
+        'total_kgfat': totalKgFat,
         'total_amount': totalAmount,
         'pdf_path': pdfPath,
         'created_at': createdAt.toIso8601String(),
@@ -56,6 +60,7 @@ class Invoice {
         fromDate: DateTime.parse(map['from_date'] as String),
         toDate: DateTime.parse(map['to_date'] as String),
         totalQuantity: (map['total_quantity'] as num).toDouble(),
+        totalKgFat: (map['total_kgfat'] as num?)?.toDouble() ?? 0.0,
         totalAmount: (map['total_amount'] as num).toDouble(),
         pdfPath: map['pdf_path'] as String?,
         createdAt: DateTime.parse(map['created_at'] as String),

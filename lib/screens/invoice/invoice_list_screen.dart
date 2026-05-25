@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:provider/provider.dart';
 import '../../models/customer.dart';
 import '../../models/invoice.dart';
@@ -111,7 +112,7 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
     final invProv = context.read<InvoiceProvider>();
 
     // Fetch entries for the date range
-    final entries = await milkProv.getByCustomerAndDateRange(
+    final List<MilkEntry> entries = await milkProv.getByCustomerAndDateRange(
         customer.id!, from, to);
 
     if (entries.isEmpty) {
@@ -127,6 +128,8 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
 
     final totalQty =
         entries.fold<double>(0, (sum, e) => sum + e.quantity);
+    final totalKgFat =
+        entries.fold<double>(0, (sum, e) => sum + e.kgFat);
     final totalAmount =
         entries.fold<double>(0, (sum, e) => sum + e.amount);
     final invoiceNumber = await InvoiceNumberGenerator.next();
@@ -138,6 +141,7 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
       fromDate: from,
       toDate: to,
       totalQuantity: totalQty,
+      totalKgFat: totalKgFat,
       totalAmount: totalAmount,
       createdAt: DateTime.now(),
     );
@@ -214,11 +218,21 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
                       ),
                       if (inv.pdfPath != null &&
                           File(inv.pdfPath!).existsSync())
-                        IconButton(
-                          icon: const Icon(Icons.share, size: 20),
-                          onPressed: () =>
-                              PdfService.sharePdf(inv.pdfPath!),
-                          tooltip: 'Share PDF',
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.open_in_new, size: 20),
+                              onPressed: () => OpenFile.open(inv.pdfPath!),
+                              tooltip: 'Open PDF',
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.share, size: 20),
+                              onPressed: () =>
+                                  PdfService.sharePdf(inv.pdfPath!),
+                              tooltip: 'Share PDF',
+                            ),
+                          ],
                         ),
                     ],
                   ),

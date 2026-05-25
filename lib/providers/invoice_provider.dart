@@ -38,6 +38,7 @@ class InvoiceProvider extends ChangeNotifier {
         fromDate: invoice.fromDate,
         toDate: invoice.toDate,
         totalQuantity: invoice.totalQuantity,
+        totalKgFat: invoice.totalKgFat,
         totalAmount: invoice.totalAmount,
         pdfPath: invoice.pdfPath,
         createdAt: invoice.createdAt,

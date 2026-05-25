@@ -48,6 +48,8 @@ class DatabaseHelper {
         rate REAL NOT NULL,
         kgfat REAL NOT NULL,
         amount REAL NOT NULL,
+        shift TEXT DEFAULT 'Morning',
+        entry_time TEXT,
         FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
       )
     ''');
@@ -60,6 +62,7 @@ class DatabaseHelper {
         from_date TEXT NOT NULL,
         to_date TEXT NOT NULL,
         total_quantity REAL NOT NULL,
+        total_kgfat REAL NOT NULL DEFAULT 0,
         total_amount REAL NOT NULL,
         pdf_path TEXT,
         created_at TEXT NOT NULL,
@@ -80,7 +83,16 @@ class DatabaseHelper {
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    // Handle future migrations here
+    if (oldVersion < 2) {
+      // milk_entries: add shift and entry_time columns
+      await db.execute(
+          "ALTER TABLE milk_entries ADD COLUMN shift TEXT DEFAULT 'Morning'");
+      await db.execute(
+          'ALTER TABLE milk_entries ADD COLUMN entry_time TEXT');
+      // invoices: add total_kgfat column
+      await db.execute(
+          'ALTER TABLE invoices ADD COLUMN total_kgfat REAL DEFAULT 0');
+    }
   }
 
   Future<void> close() async {

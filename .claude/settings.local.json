@@ -4,7 +4,8 @@
       "Bash(pandoc \"Milk center application.docx\" -t markdown)",
       "PowerShell(flutter --version 2>&1)",
       "PowerShell(gh --version)",
-      "PowerShell(Get-ChildItem \"C:\\\\\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem \"$env:USERPROFILE\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName)"
+      "PowerShell(Get-ChildItem \"C:\\\\\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem \"$env:USERPROFILE\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName)",
+      "Bash(git add *)"
     ]
   }
 }

@@ -15,7 +15,7 @@ class AppConstants {
 
   // DB Name
   static const String dbName = 'milk_parlour.db';
-  static const int dbVersion = 1;
+  static const int dbVersion = 2;
 
   // Backup file name
   static const String backupFileName = 'hkmc_backup.db';

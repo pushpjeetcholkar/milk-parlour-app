@@ -119,7 +119,7 @@ class MilkEntryRepository {
       SELECT
         c.name AS customer_name,
         SUM(me.quantity) AS total_quantity,
-        AVG(me.fat)      AS avg_fat,
+        SUM(me.kgfat)    AS total_kgfat,
         SUM(me.amount)   AS total_amount
       FROM milk_entries me
       LEFT JOIN customers c ON c.id = me.customer_id
@@ -142,6 +142,7 @@ class MilkEntryRepository {
         DATE(date)       AS period_label,
         COUNT(*)         AS entry_count,
         SUM(quantity)    AS total_quantity,
+        SUM(kgfat)       AS total_kgfat,
         SUM(amount)      AS total_amount
       FROM milk_entries
       WHERE DATE(date) BETWEEN ? AND ?
@@ -163,6 +164,7 @@ class MilkEntryRepository {
         MAX(DATE(date))          AS week_end,
         COUNT(*)                 AS entry_count,
         SUM(quantity)            AS total_quantity,
+        SUM(kgfat)               AS total_kgfat,
         SUM(amount)              AS total_amount
       FROM milk_entries
       WHERE DATE(date) BETWEEN ? AND ?
@@ -182,6 +184,7 @@ class MilkEntryRepository {
         strftime('%Y-%m', date) AS period_label,
         COUNT(*)                AS entry_count,
         SUM(quantity)           AS total_quantity,
+        SUM(kgfat)              AS total_kgfat,
         SUM(amount)             AS total_amount
       FROM milk_entries
       WHERE DATE(date) BETWEEN ? AND ?

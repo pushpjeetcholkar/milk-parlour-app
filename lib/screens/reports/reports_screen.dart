@@ -212,11 +212,10 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
   }
 
   Widget _buildCustomerResults() {
-    final entries = _results!;
+    final entries  = _results!;
     final totalQty = entries.fold<double>(0, (s, e) => s + e.quantity);
+    final totalKgF = entries.fold<double>(0, (s, e) => s + e.kgFat);
     final totalAmt = entries.fold<double>(0, (s, e) => s + e.amount);
-    final avgFat =
-        entries.fold<double>(0, (s, e) => s + e.fat) / entries.length;
 
     return Column(
       children: [
@@ -233,8 +232,8 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
                   label: 'Total Qty',
                   value: '${totalQty.toStringAsFixed(2)} L'),
               _MiniStat(
-                  label: 'Avg FAT',
-                  value: '${avgFat.toStringAsFixed(2)}%'),
+                  label: 'Total KG FAT',
+                  value: totalKgF.toStringAsFixed(4)),
               _MiniStat(
                   label: 'Total',
                   value: 'INR ${_currFmt.format(totalAmt)}'),
@@ -248,6 +247,12 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
             itemCount: entries.length,
             itemBuilder: (context, i) {
               final e = entries[i];
+              final shiftIcon = e.shift == 'Morning'
+                  ? Icons.wb_sunny
+                  : Icons.nights_stay;
+              final shiftColor =
+                  e.shift == 'Morning' ? Colors.orange : Colors.indigo;
+
               return Card(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -259,9 +264,32 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
                         mainAxisAlignment:
                             MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(_dateFmt.format(e.date),
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold)),
+                          // Date + shift + time
+                          Row(
+                            children: [
+                              Text(_dateFmt.format(e.date),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 8),
+                              Icon(shiftIcon,
+                                  size: 14, color: shiftColor),
+                              const SizedBox(width: 2),
+                              Text(
+                                e.shift,
+                                style: TextStyle(
+                                    fontSize: 11,
+                                    color: shiftColor,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              if (e.entryTime != null) ...[
+                                const SizedBox(width: 6),
+                                Text('• ${e.entryTime}',
+                                    style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey)),
+                              ],
+                            ],
+                          ),
                           Text('INR ${_currFmt.format(e.amount)}',
                               style: const TextStyle(
                                   color: Colors.green,
@@ -276,7 +304,8 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
                         children: [
                           _EntryChip(
                               'Qty: ${e.quantity.toStringAsFixed(2)} L'),
-                          _EntryChip('CLR: ${e.clr.toStringAsFixed(2)}'),
+                          _EntryChip(
+                              'CLR: ${e.clr.toStringAsFixed(2)}'),
                           _EntryChip(
                               'FAT: ${e.fat.toStringAsFixed(2)}%'),
                           _EntryChip(
@@ -299,8 +328,19 @@ class _CustomerReportTabState extends State<_CustomerReportTab> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total (${entries.length} entries)',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Total (${entries.length} entries)',
+                      style:
+                          const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'KG FAT: ${totalKgF.toStringAsFixed(4)}',
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.blue.shade700),
+                  ),
+                ],
+              ),
               Text('INR ${_currFmt.format(totalAmt)}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,
@@ -551,10 +591,12 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
   }
 
   Widget _buildSummaryResults() {
-    final rows = _results!;
-    final grandQty = rows.fold<double>(
+    final rows      = _results!;
+    final grandQty  = rows.fold<double>(
         0, (s, r) => s + (r['total_quantity'] as num).toDouble());
-    final grandAmt = rows.fold<double>(
+    final grandKgF  = rows.fold<double>(
+        0, (s, r) => s + ((r['total_kgfat'] as num?)?.toDouble() ?? 0.0));
+    final grandAmt  = rows.fold<double>(
         0, (s, r) => s + (r['total_amount'] as num).toDouble());
 
     return Column(
@@ -572,6 +614,9 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
                   label: 'Total Qty',
                   value: '${grandQty.toStringAsFixed(2)} L'),
               _MiniStat(
+                  label: 'Total KG FAT',
+                  value: grandKgF.toStringAsFixed(4)),
+              _MiniStat(
                   label: 'Grand Total',
                   value: 'INR ${_currFmt.format(grandAmt)}'),
             ],
@@ -583,12 +628,14 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
             padding: const EdgeInsets.all(8),
             itemCount: rows.length,
             itemBuilder: (context, i) {
-              final r = rows[i];
-              final qty =
-                  (r['total_quantity'] as num).toDouble();
-              final amt = (r['total_amount'] as num).toDouble();
+              final r          = rows[i];
+              final qty        = (r['total_quantity'] as num).toDouble();
+              final kgf        =
+                  ((r['total_kgfat'] as num?)?.toDouble() ?? 0.0);
+              final amt        = (r['total_amount'] as num).toDouble();
               final entryCount = r['entry_count'] as int;
-              final pct = grandAmt > 0 ? (amt / grandAmt * 100) : 0.0;
+              final pct        =
+                  grandAmt > 0 ? (amt / grandAmt * 100) : 0.0;
 
               return Card(
                 child: Padding(
@@ -634,8 +681,9 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
                         spacing: 6,
                         runSpacing: 4,
                         children: [
+                          _EntryChip('${qty.toStringAsFixed(2)} L'),
                           _EntryChip(
-                              '${qty.toStringAsFixed(2)} L'),
+                              'KG FAT: ${kgf.toStringAsFixed(4)}'),
                           _EntryChip('$entryCount entries'),
                           _EntryChip(
                               '${pct.toStringAsFixed(1)}% of total'),
@@ -655,8 +703,19 @@ class _PeriodSummaryTabState extends State<_PeriodSummaryTab> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Grand Total (${rows.length} periods)',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Grand Total (${rows.length} periods)',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold)),
+                  Text(
+                    'KG FAT: ${grandKgF.toStringAsFixed(4)}',
+                    style: TextStyle(
+                        fontSize: 12, color: Colors.blue.shade700),
+                  ),
+                ],
+              ),
               Text('INR ${_currFmt.format(grandAmt)}',
                   style: const TextStyle(
                       fontWeight: FontWeight.bold,

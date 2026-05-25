@@ -9,6 +9,8 @@ class MilkEntry {
   final double rate;
   final double kgFat;
   final double amount;
+  final String shift;       // 'Morning' or 'Evening'
+  final String? entryTime;  // HH:mm format, e.g. '09:35'
 
   MilkEntry({
     this.id,
@@ -21,6 +23,8 @@ class MilkEntry {
     required this.rate,
     required this.kgFat,
     required this.amount,
+    this.shift = 'Morning',
+    this.entryTime,
   });
 
   Map<String, dynamic> toMap() => {
@@ -33,6 +37,8 @@ class MilkEntry {
         'rate': rate,
         'kgfat': kgFat,
         'amount': amount,
+        'shift': shift,
+        'entry_time': entryTime,
       };
 
   factory MilkEntry.fromMap(Map<String, dynamic> map) => MilkEntry(
@@ -46,5 +52,7 @@ class MilkEntry {
         rate: (map['rate'] as num).toDouble(),
         kgFat: (map['kgfat'] as num).toDouble(),
         amount: (map['amount'] as num).toDouble(),
+        shift: map['shift'] as String? ?? 'Morning',
+        entryTime: map['entry_time'] as String?,
       );
 }
