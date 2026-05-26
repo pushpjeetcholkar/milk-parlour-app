@@ -35,6 +35,14 @@ dependencies:
 
   # Persistent settings
   shared_preferences: ^2.3.4
+
+  # Google Drive backup
+  google_sign_in: ^6.2.2
+  googleapis: ^13.2.0
+  extension_google_sign_in_as_googleapis_auth: ^2.0.12
+
+  # Background task scheduler (daily auto-backup)
+  workmanager: ^0.5.2
   # File Picker (backup/restore)
   file_picker: ^10.3.2
 

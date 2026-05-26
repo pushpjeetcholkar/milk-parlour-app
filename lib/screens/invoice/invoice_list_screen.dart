@@ -192,51 +192,204 @@ class _InvoiceListScreenState extends State<InvoiceListScreen> {
           }
           return ListView.builder(
             itemCount: prov.invoices.length,
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             itemBuilder: (context, i) {
               final inv = prov.invoices[i];
+              final hasPdf =
+                  inv.pdfPath != null && File(inv.pdfPath!).existsSync();
+
               return Card(
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.receipt, size: 20),
-                  ),
-                  title: Text(inv.invoiceNumber,
-                      style:
-                          const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text(
-                      '${inv.customerName ?? '—'}\n${_dateFmt.format(inv.fromDate)} - ${_dateFmt.format(inv.toDate)}'),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'INR ${_currFmt.format(inv.totalAmount)}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                            fontSize: 15),
-                      ),
-                      if (inv.pdfPath != null &&
-                          File(inv.pdfPath!).existsSync())
+                elevation: 3,
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () {
+                    // Tap card to open PDF if available
+                    if (hasPdf) OpenFile.open(inv.pdfPath!);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── Row 1: Invoice number badge + Amount ──────────
                         Row(
-                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.open_in_new, size: 20),
-                              onPressed: () => OpenFile.open(inv.pdfPath!),
-                              tooltip: 'Open PDF',
+                            // Blue invoice number badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade700,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.receipt_long,
+                                      size: 14, color: Colors.white),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    inv.invoiceNumber,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.share, size: 20),
-                              onPressed: () =>
-                                  PdfService.sharePdf(inv.pdfPath!),
-                              tooltip: 'Share PDF',
+                            const Spacer(),
+                            // Green amount chip
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade600,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'INR ${_currFmt.format(inv.totalAmount)}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                    ],
+                        const SizedBox(height: 10),
+
+                        // ── Row 2: Customer name ──────────────────────────
+                        Row(
+                          children: [
+                            const Icon(Icons.person,
+                                size: 16, color: Colors.blueGrey),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                inv.customerName ?? '—',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+
+                        // ── Row 3: Date range + KG FAT ───────────────────
+                        Row(
+                          children: [
+                            const Icon(Icons.date_range,
+                                size: 14, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${_dateFmt.format(inv.fromDate)}  →  ${_dateFmt.format(inv.toDate)}',
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                border: Border.all(
+                                    color: Colors.orange.shade300),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                '${inv.totalKgFat.toStringAsFixed(2)} KG FAT',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange.shade800,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        // ── Row 4: PDF action buttons (only if PDF exists) ─
+                        if (hasPdf) ...[
+                          const SizedBox(height: 8),
+                          const Divider(height: 1),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              // PDF file chip
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  border: Border.all(
+                                      color: Colors.red.shade300),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.picture_as_pdf,
+                                        size: 14,
+                                        color: Colors.red.shade700),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'PDF',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.red.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const Spacer(),
+                              // Open button
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.blue.shade700,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                icon: const Icon(Icons.open_in_new, size: 16),
+                                label: const Text('Open',
+                                    style: TextStyle(fontSize: 13)),
+                                onPressed: () => OpenFile.open(inv.pdfPath!),
+                              ),
+                              const SizedBox(width: 4),
+                              // Share button
+                              TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.teal.shade700,
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                icon: const Icon(Icons.share, size: 16),
+                                label: const Text('Share',
+                                    style: TextStyle(fontSize: 13)),
+                                onPressed: () =>
+                                    PdfService.sharePdf(inv.pdfPath!),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  isThreeLine: true,
                 ),
               );
             },

@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
     <!-- For Android 13+ -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <!-- Internet for Google Drive backup -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- WorkManager: reschedule tasks after reboot -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- WorkManager: prevent Doze mode from delaying backup -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
         android:label="HKMC Milk"

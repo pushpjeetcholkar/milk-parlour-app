@@ -10,7 +10,9 @@
       "Bash(git push *)",
       "Bash(flutter pub *)",
       "Bash(flutter analyze *)",
-      "Bash(git commit -m 'feat: analytics charts, default rate setting, optional CLR, tab color fix *)"
+      "Bash(git commit -m 'feat: analytics charts, default rate setting, optional CLR, tab color fix *)",
+      "Bash(rm -f \"C:/Pushpjeet Data/Project Milk Parlour/.git/index.lock\" 2>&1 && echo \"Lock file removed\")",
+      "Bash(flutter clean *)"
     ]
   }
 }
