@@ -42,7 +42,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.12
 
   # Background task scheduler (daily auto-backup)
-  workmanager: ^0.5.2
+  workmanager: ^0.9.0
   # File Picker (backup/restore)
   file_picker: ^10.3.2
 
