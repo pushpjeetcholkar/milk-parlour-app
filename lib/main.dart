@@ -63,7 +63,7 @@ Future<void> _registerDailyBackup() async {
       networkType: NetworkType.connected, // Only backup when internet is on
       requiresBatteryNotLow: true,
     ),
-    existingWorkPolicy: ExistingWorkPolicy.replace,
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
   );
 }
 
