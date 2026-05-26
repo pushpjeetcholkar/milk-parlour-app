@@ -43,8 +43,8 @@ class MilkEntryProvider extends ChangeNotifier {
       _repo.getByDateRange(from, to);
 
   Future<List<MilkEntry>> getByCustomerAndDateRange(
-          int customerId, DateTime from, DateTime to) =>
-      _repo.getByCustomerAndDateRange(customerId, from, to);
+          int customerId, DateTime from, DateTime to, {String? shift}) =>
+      _repo.getByCustomerAndDateRange(customerId, from, to, shift: shift);
 
   Future<bool> add(MilkEntry entry) async {
     try {
@@ -103,4 +103,25 @@ class MilkEntryProvider extends ChangeNotifier {
   Future<List<Map<String, dynamic>>> getMonthlyBreakdown(
           DateTime from, DateTime to) =>
       _repo.getMonthlyBreakdown(from, to);
+
+  // ── Shift analysis ─────────────────────────────────────────────────────────
+  Future<List<Map<String, dynamic>>> getShiftTotals(
+          DateTime from, DateTime to) =>
+      _repo.getShiftTotals(from, to);
+
+  Future<List<Map<String, dynamic>>> getCustomerShiftSummary(
+          DateTime from, DateTime to) =>
+      _repo.getCustomerShiftSummary(from, to);
+
+  Future<List<Map<String, dynamic>>> getDailyShiftBreakdown(
+          DateTime from, DateTime to) =>
+      _repo.getDailyShiftBreakdown(from, to);
+
+  Future<List<Map<String, dynamic>>> getWeeklyShiftBreakdown(
+          DateTime from, DateTime to) =>
+      _repo.getWeeklyShiftBreakdown(from, to);
+
+  Future<List<Map<String, dynamic>>> getMonthlyShiftBreakdown(
+          DateTime from, DateTime to) =>
+      _repo.getMonthlyShiftBreakdown(from, to);
 }

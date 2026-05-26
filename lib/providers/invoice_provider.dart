@@ -6,10 +6,12 @@ class InvoiceProvider extends ChangeNotifier {
   final InvoiceRepository _repo = InvoiceRepository();
 
   List<Invoice> _invoices = [];
+  List<Map<String, dynamic>> _pendingCustomers = [];
   bool _loading = false;
   String? _error;
 
   List<Invoice> get invoices => _invoices;
+  List<Map<String, dynamic>> get pendingCustomers => _pendingCustomers;
   bool get loading => _loading;
   String? get error => _error;
 
@@ -18,13 +20,25 @@ class InvoiceProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _invoices = await _repo.getAll();
+      final results = await Future.wait([
+        _repo.getAll(),
+        _repo.getCustomersWithPendingInvoices(),
+      ]);
+      _invoices         = results[0] as List<Invoice>;
+      _pendingCustomers = results[1] as List<Map<String, dynamic>>;
     } catch (e) {
       _error = e.toString();
     } finally {
       _loading = false;
       notifyListeners();
     }
+  }
+
+  Future<void> refreshPending() async {
+    try {
+      _pendingCustomers = await _repo.getCustomersWithPendingInvoices();
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<Invoice?> save(Invoice invoice) async {
