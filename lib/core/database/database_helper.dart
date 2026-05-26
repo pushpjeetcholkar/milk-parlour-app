@@ -63,6 +63,10 @@ class DatabaseHelper {
         to_date TEXT NOT NULL,
         total_quantity REAL NOT NULL,
         total_kgfat REAL NOT NULL DEFAULT 0,
+        milk_amount REAL NOT NULL DEFAULT 0,
+        extra_amount REAL NOT NULL DEFAULT 0,
+        discount REAL NOT NULL DEFAULT 0,
+        adjustment_note TEXT,
         total_amount REAL NOT NULL,
         pdf_path TEXT,
         created_at TEXT NOT NULL,
@@ -92,6 +96,20 @@ class DatabaseHelper {
       // invoices: add total_kgfat column
       await db.execute(
           'ALTER TABLE invoices ADD COLUMN total_kgfat REAL DEFAULT 0');
+    }
+    if (oldVersion < 3) {
+      // invoices: add adjustment columns
+      // milk_amount defaults to total_amount so old invoices stay correct.
+      await db.execute(
+          'ALTER TABLE invoices ADD COLUMN milk_amount REAL DEFAULT 0');
+      await db.execute(
+          'UPDATE invoices SET milk_amount = total_amount WHERE milk_amount = 0');
+      await db.execute(
+          'ALTER TABLE invoices ADD COLUMN extra_amount REAL DEFAULT 0');
+      await db.execute(
+          'ALTER TABLE invoices ADD COLUMN discount REAL DEFAULT 0');
+      await db.execute(
+          'ALTER TABLE invoices ADD COLUMN adjustment_note TEXT');
     }
   }
 

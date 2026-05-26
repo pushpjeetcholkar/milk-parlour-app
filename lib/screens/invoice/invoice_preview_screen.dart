@@ -211,9 +211,45 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
               children: [
                 Text('Total KG FAT: ${totalKgFat.toStringAsFixed(4)}',
                     style: const TextStyle(fontSize: 14)),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
+                // Milk subtotal
                 Text(
-                  'Total Payable: INR ${_currFmt.format(widget.invoice.totalAmount)}',
+                  'Milk Amount: INR ${_currFmt.format(widget.invoice.milkAmount)}',
+                  style: const TextStyle(fontSize: 13),
+                ),
+                // Extra amount (only if > 0)
+                if (widget.invoice.extraAmount > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Extra Amount (+): INR ${_currFmt.format(widget.invoice.extraAmount)}',
+                    style: TextStyle(
+                        fontSize: 13, color: Colors.green.shade700),
+                  ),
+                ],
+                // Discount (only if > 0)
+                if (widget.invoice.discount > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Discount (−): INR ${_currFmt.format(widget.invoice.discount)}',
+                    style: TextStyle(
+                        fontSize: 13, color: Colors.red.shade700),
+                  ),
+                ],
+                // Note
+                if (widget.invoice.adjustmentNote != null &&
+                    widget.invoice.adjustmentNote!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Note: ${widget.invoice.adjustmentNote}',
+                    style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey.shade600),
+                  ),
+                ],
+                const Divider(),
+                Text(
+                  'Net Payable: INR ${_currFmt.format(widget.invoice.totalAmount)}',
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.bold),
                 ),

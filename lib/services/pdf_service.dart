@@ -178,6 +178,10 @@ class PdfService {
 
   // ── Totals ─────────────────────────────────────────────────────────────────
   static pw.Widget _buildTotals(Invoice invoice) {
+    final hasAdj = invoice.extraAmount > 0 || invoice.discount > 0;
+    final hasNote = invoice.adjustmentNote != null &&
+        invoice.adjustmentNote!.trim().isNotEmpty;
+
     return pw.Align(
       alignment: pw.Alignment.centerRight,
       child: pw.Container(
@@ -190,6 +194,7 @@ class PdfService {
         child: pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.end,
           children: [
+            // Qty & KG FAT summary
             pw.Text(
               'Total Quantity: ${invoice.totalQuantity.toStringAsFixed(2)} L',
               style: pw.TextStyle(fontSize: 11),
@@ -202,8 +207,90 @@ class PdfService {
             pw.SizedBox(height: 6),
             pw.Divider(color: PdfColors.blue200),
             pw.SizedBox(height: 6),
+
+            // Milk subtotal (always shown)
+            pw.Row(
+              mainAxisSize: pw.MainAxisSize.min,
+              children: [
+                pw.Text('Milk Amount:', style: pw.TextStyle(fontSize: 11)),
+                pw.SizedBox(width: 8),
+                pw.Text(
+                  'INR ${_currencyFormat.format(invoice.milkAmount)}',
+                  style: pw.TextStyle(fontSize: 11),
+                ),
+              ],
+            ),
+
+            // Extra amount row (only if > 0)
+            if (invoice.extraAmount > 0) ...[
+              pw.SizedBox(height: 3),
+              pw.Row(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Text('Extra Amount (+):',
+                      style: pw.TextStyle(
+                          fontSize: 11, color: PdfColors.green700)),
+                  pw.SizedBox(width: 8),
+                  pw.Text(
+                    'INR ${_currencyFormat.format(invoice.extraAmount)}',
+                    style: pw.TextStyle(
+                        fontSize: 11, color: PdfColors.green700),
+                  ),
+                ],
+              ),
+            ],
+
+            // Discount row (only if > 0)
+            if (invoice.discount > 0) ...[
+              pw.SizedBox(height: 3),
+              pw.Row(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Text('Discount (−):',
+                      style: pw.TextStyle(
+                          fontSize: 11, color: PdfColors.red700)),
+                  pw.SizedBox(width: 8),
+                  pw.Text(
+                    'INR ${_currencyFormat.format(invoice.discount)}',
+                    style: pw.TextStyle(
+                        fontSize: 11, color: PdfColors.red700),
+                  ),
+                ],
+              ),
+            ],
+
+            // Note (only if present)
+            if (hasNote) ...[
+              pw.SizedBox(height: 3),
+              pw.Row(
+                mainAxisSize: pw.MainAxisSize.min,
+                children: [
+                  pw.Text('Note: ',
+                      style: pw.TextStyle(
+                          fontSize: 10,
+                          fontStyle: pw.FontStyle.italic,
+                          color: PdfColors.grey700)),
+                  pw.Text(invoice.adjustmentNote!,
+                      style: pw.TextStyle(
+                          fontSize: 10,
+                          fontStyle: pw.FontStyle.italic,
+                          color: PdfColors.grey700)),
+                ],
+              ),
+            ],
+
+            // Divider only if adjustments exist
+            if (hasAdj) ...[
+              pw.SizedBox(height: 6),
+              pw.Divider(color: PdfColors.blue300),
+              pw.SizedBox(height: 4),
+            ] else ...[
+              pw.SizedBox(height: 6),
+            ],
+
+            // Net payable — always bold & large
             pw.Text(
-              'Total Payable: INR ${_currencyFormat.format(invoice.totalAmount)}',
+              'Net Payable: INR ${_currencyFormat.format(invoice.totalAmount)}',
               style: pw.TextStyle(
                 fontWeight: pw.FontWeight.bold,
                 fontSize: 15,
