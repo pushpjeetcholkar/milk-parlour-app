@@ -5,6 +5,7 @@ import '../../models/customer.dart';
 import '../../models/milk_entry.dart';
 import '../../providers/customer_provider.dart';
 import '../../providers/milk_entry_provider.dart';
+import 'analytics_tab.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -20,7 +21,7 @@ class _ReportsScreenState extends State<ReportsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CustomerProvider>().loadAll();
     });
@@ -40,8 +41,9 @@ class _ReportsScreenState extends State<ReportsScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: const [
-            Tab(icon: Icon(Icons.person_search), text: 'Customer Report'),
-            Tab(icon: Icon(Icons.bar_chart), text: 'Period Summary'),
+            Tab(icon: Icon(Icons.person_search), text: 'Customer'),
+            Tab(icon: Icon(Icons.bar_chart), text: 'Period'),
+            Tab(icon: Icon(Icons.insights), text: 'Analytics'),
           ],
         ),
       ),
@@ -50,6 +52,7 @@ class _ReportsScreenState extends State<ReportsScreen>
         children: const [
           _CustomerReportTab(),
           _PeriodSummaryTab(),
+          AnalyticsTab(),
         ],
       ),
     );

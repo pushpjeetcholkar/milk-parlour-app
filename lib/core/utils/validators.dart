@@ -38,7 +38,7 @@ class Validators {
   }
 
   static String? validateClr(String? value) {
-    if (value == null || value.trim().isEmpty) return 'CLR is required';
+    if (value == null || value.trim().isEmpty) return null; // CLR is optional
     final d = double.tryParse(value.trim());
     if (d == null) return 'Enter a valid number';
     return null;

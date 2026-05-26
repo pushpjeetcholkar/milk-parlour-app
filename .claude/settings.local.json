@@ -5,7 +5,12 @@
       "PowerShell(flutter --version 2>&1)",
       "PowerShell(gh --version)",
       "PowerShell(Get-ChildItem \"C:\\\\\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName; Get-ChildItem \"$env:USERPROFILE\" -Filter \"flutter\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object FullName)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m 'feat: KG FAT totals, shift+time, searchable dropdown, fix invoice opening *)",
+      "Bash(git push *)",
+      "Bash(flutter pub *)",
+      "Bash(flutter analyze *)",
+      "Bash(git commit -m 'feat: analytics charts, default rate setting, optional CLR, tab color fix *)"
     ]
   }
 }

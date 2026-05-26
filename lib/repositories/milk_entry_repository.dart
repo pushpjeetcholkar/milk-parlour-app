@@ -193,6 +193,30 @@ class MilkEntryRepository {
     ''', [fromStr, toStr]);
   }
 
+  // ── Analytics: per-customer aggregate stats for a date range ──────────────
+  Future<List<Map<String, dynamic>>> getCustomerRangeSummary(
+      DateTime from, DateTime to) async {
+    final db      = await _db.database;
+    final fromStr = from.toIso8601String().substring(0, 10);
+    final toStr   = to.toIso8601String().substring(0, 10);
+    return db.rawQuery('''
+      SELECT
+        c.id                        AS customer_id,
+        c.name                      AS customer_name,
+        COUNT(*)                    AS entry_count,
+        COUNT(DISTINCT DATE(me.date)) AS days_present,
+        SUM(me.quantity)            AS total_quantity,
+        AVG(me.fat)                 AS avg_fat,
+        SUM(me.kgfat)               AS total_kgfat,
+        SUM(me.amount)              AS total_amount
+      FROM milk_entries me
+      LEFT JOIN customers c ON c.id = me.customer_id
+      WHERE DATE(me.date) BETWEEN ? AND ?
+      GROUP BY me.customer_id
+      ORDER BY total_quantity DESC
+    ''', [fromStr, toStr]);
+  }
+
   // ── Helpers ────────────────────────────────────────────────────────────────
   static String _monthStart(int year, int month) =>
       '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-01';

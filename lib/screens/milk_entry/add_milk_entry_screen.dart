@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../core/services/settings_service.dart';
 import '../../core/utils/calculation_engine.dart';
 import '../../core/utils/validators.dart';
 import '../../models/customer.dart';
@@ -38,7 +39,16 @@ class _AddMilkEntryScreenState extends State<AddMilkEntryScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<CustomerProvider>().loadAll();
+      _loadDefaultRate();
     });
+  }
+
+  Future<void> _loadDefaultRate() async {
+    final rate = await SettingsService.getDefaultRate();
+    if (mounted) {
+      _rateCtrl.text = rate.toStringAsFixed(2);
+      _recalculate();
+    }
   }
 
   @override
@@ -103,7 +113,7 @@ class _AddMilkEntryScreenState extends State<AddMilkEntryScreen> {
       customerId: _selectedCustomer!.id!,
       date:       _selectedDate,
       quantity:   double.parse(_qtyCtrl.text),
-      clr:        double.parse(_clrCtrl.text),
+      clr:        double.tryParse(_clrCtrl.text) ?? 0.0, // CLR optional
       fat:        double.parse(_fatCtrl.text),
       rate:       double.parse(_rateCtrl.text),
       kgFat:      _kgFat,
@@ -231,15 +241,16 @@ class _AddMilkEntryScreenState extends State<AddMilkEntryScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ── CLR ──────────────────────────────────────────────────────
+              // ── CLR (optional) ───────────────────────────────────────────
               TextFormField(
                 controller: _clrCtrl,
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
                 decoration: const InputDecoration(
-                  labelText: 'CLR *',
+                  labelText: 'CLR (optional)',
                   prefixIcon: Icon(Icons.science),
                   border: OutlineInputBorder(),
+                  hintText: 'Leave empty if not measured',
                 ),
                 onChanged: (_) => _recalculate(),
                 validator: Validators.validateClr,

@@ -86,6 +86,11 @@ class MilkEntryProvider extends ChangeNotifier {
           int year, int month) =>
       _repo.getMonthlySummary(year, month);
 
+  // ── Analytics ──────────────────────────────────────────────────────────────
+  Future<List<Map<String, dynamic>>> getCustomerRangeSummary(
+          DateTime from, DateTime to) =>
+      _repo.getCustomerRangeSummary(from, to);
+
   // ── Period breakdown (Reports screen) ─────────────────────────────────────
   Future<List<Map<String, dynamic>>> getDailyBreakdown(
           DateTime from, DateTime to) =>

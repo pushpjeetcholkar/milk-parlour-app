@@ -48,6 +48,14 @@ class MilkParlourApp extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10)),
             ),
           ),
+          tabBarTheme: const TabBarThemeData(
+            labelColor: Colors.white,
+            unselectedLabelColor: Color(0xB3FFFFFF), // white70
+            indicatorColor: Colors.white,
+            dividerColor: Colors.transparent,
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            unselectedLabelStyle: TextStyle(fontSize: 13),
+          ),
           cardTheme: CardThemeData(
             elevation: 2,
             shape: RoundedRectangleBorder(

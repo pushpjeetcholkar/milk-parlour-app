@@ -29,6 +29,12 @@ dependencies:
 
   # Open files natively on device
   open_file: ^3.3.2
+
+  # Charts
+  fl_chart: ^0.70.2
+
+  # Persistent settings
+  shared_preferences: ^2.3.4
   # File Picker (backup/restore)
   file_picker: ^10.3.2
 
