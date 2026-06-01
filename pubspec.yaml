@@ -49,6 +49,22 @@ dependencies:
   # Date formatting
   intl: ^0.20.2
 
+  # URL launcher (for PITC website link)
+  url_launcher: ^6.3.2
+
+  # Scan-based entry: camera / gallery picker
+  image_picker: ^1.1.2
+  # Scan-based entry: custom camera with frame overlay
+  camera: ^0.11.0+2
+  # Scan-based entry: on-device OCR (ML Kit, works offline)
+  google_mlkit_text_recognition: ^0.13.1
+  # Google Cloud Vision API (handwriting OCR)
+  http: ^1.2.2
+  # Scan-based entry: image rotation for tilt correction
+  image: ^4.2.0
+  # Scan-based entry: crop image to select only data rows
+  image_cropper: ^9.1.0
+
   # Icons
   cupertino_icons: ^1.0.8
 

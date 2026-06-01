@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/database/database_helper.dart';
 import '../../core/services/settings_service.dart';
@@ -14,16 +15,21 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   double _defaultRate = 9.0;
   bool _seeding = false;
+  bool _hasCloudVisionKey = false;
 
   @override
   void initState() {
     super.initState();
-    _loadRate();
+    _loadSettings();
   }
 
-  Future<void> _loadRate() async {
+  Future<void> _loadSettings() async {
     final r = await SettingsService.getDefaultRate();
-    if (mounted) setState(() => _defaultRate = r);
+    final k = await SettingsService.getCloudVisionApiKey();
+    if (mounted) setState(() {
+      _defaultRate = r;
+      _hasCloudVisionKey = k != null;
+    });
   }
 
   Future<void> _editDefaultRate() async {
@@ -64,6 +70,87 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Default rate set to INR ${saved.toStringAsFixed(2)}'),
+          ),
+        );
+      }
+    }
+  }
+
+  // ── Cloud Vision API Key ────────────────────────────────────────────────────
+
+  Future<void> _editCloudVisionKey() async {
+    final existing = await SettingsService.getCloudVisionApiKey();
+    final ctrl = TextEditingController(text: existing ?? '');
+    if (!mounted) return;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Cloud Vision API Key'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your Google Cloud Vision API key. '
+              'This enables handwriting recognition when scanning register pages.',
+              style: TextStyle(fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'AIza…',
+                border: OutlineInputBorder(),
+                isDense: true,
+              ),
+              obscureText: true,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Google Cloud Console → APIs & Services → Credentials.\n'
+              'Enable the Cloud Vision API for your project.',
+              style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+        actions: [
+          if (existing != null)
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, ''),
+              child: const Text('Remove Key',
+                  style: TextStyle(color: Colors.red)),
+            ),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == null || !mounted) return;
+
+    if (result.isEmpty) {
+      await SettingsService.setCloudVisionApiKey(null);
+      if (mounted) {
+        setState(() => _hasCloudVisionKey = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('API key removed')),
+        );
+      }
+    } else {
+      await SettingsService.setCloudVisionApiKey(result);
+      if (mounted) {
+        setState(() => _hasCloudVisionKey = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cloud Vision API key saved'),
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -258,6 +345,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           const SizedBox(height: 24),
+          // ── Scan / OCR ──────────────────────────────────────────────────
+          const _SectionHeader(title: 'Scan & OCR'),
+          Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.cloud,
+                color: _hasCloudVisionKey
+                    ? Colors.deepPurple
+                    : Colors.grey,
+              ),
+              title: const Text('Google Cloud Vision API'),
+              subtitle: Text(
+                _hasCloudVisionKey
+                    ? 'API key configured — handwriting OCR enabled'
+                    : 'Add API key to enable handwriting recognition',
+              ),
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_hasCloudVisionKey)
+                    const Icon(Icons.check_circle,
+                        color: Colors.green, size: 20),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.edit, size: 18, color: Colors.deepPurple),
+                ],
+              ),
+              onTap: _editCloudVisionKey,
+            ),
+          ),
+
+          const SizedBox(height: 24),
           // ── Business Info ─────────────────────────────────────────────────
           const _SectionHeader(title: 'Business Information'),
           _InfoTile(label: 'Firm Name', value: AppConstants.firmName),
@@ -304,6 +422,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
               leading: Icon(Icons.local_drink),
               title: Text('App'),
               trailing: Text('HKMC Milk App'),
+            ),
+          ),
+          const SizedBox(height: 6),
+          // ── PITC India branding ────────────────────────────────────────
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  // PITC logo
+                  Image.asset(
+                    'assets/images/pitc_log.jpg',
+                    width: 72,
+                    height: 40,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 72,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.blue.shade200),
+                      ),
+                      child: Icon(Icons.business,
+                          color: Colors.blue.shade700, size: 28),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Developed by PITC India',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(height: 3),
+                        GestureDetector(
+                          onTap: () => launchUrl(
+                            Uri.parse('https://www.pitcsolutions.com'),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                          child: Text(
+                            'www.pitcsolutions.com',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.blue.shade700,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+          // ── Support ───────────────────────────────────────────────────────
+          const _SectionHeader(title: 'Support'),
+          Card(
+            child: ListTile(
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF25D366),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.chat, color: Colors.white, size: 22),
+              ),
+              title: const Text(
+                'Chat on WhatsApp',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('+91 70492 35525'),
+              trailing: const Icon(Icons.open_in_new,
+                  size: 18, color: Colors.grey),
+              onTap: () => launchUrl(
+                Uri.parse('https://wa.me/917049235525'),
+                mode: LaunchMode.externalApplication,
+              ),
             ),
           ),
 
